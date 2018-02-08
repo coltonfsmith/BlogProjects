@@ -5,6 +5,10 @@ Created on Sat Dec  2 12:48:11 2017
 @author: Colton Smith
 """
 
+### Update 2/8 - Line 93 and 105 fixed adjustment ###
+### Plot in post is not updates ###
+### If anyone wants to clean this Python please do so and let me know :) ###
+
 import pandas as pd
 import numpy as np
 import quandl
@@ -88,7 +92,7 @@ switch_pre = switch_pre.append(cont.iloc[len(cont)-1])
 
 for i in range(1,len(CME_months)*len(CME_years)):
     cur = df_dict[contracts[i]]
-    cur = cur[cur.index.values > start]
+    cur = cur[cur.index.values >= start]
     switch_post = switch_post.append(cur.iloc[0])
     start = cur.index.values[len(cur)-1]
     switch_pre = switch_pre.append(cur.iloc[len(cur)-1])
@@ -100,6 +104,7 @@ switch_post = pd.DataFrame(switch_post['change'])
 
 main = cont.merge(switch_post,how='left',left_index=True,right_index=True)
 main = main.fillna(0)
+main = main.reset_index().drop_duplicates(subset='index',keep='last').set_index('index')
 main['forward'] = main.change.cumsum()
 main['backward'] = main.loc[::-1, 'change'].cumsum()[::-1]
 main.backward = main.backward.shift(-1)
